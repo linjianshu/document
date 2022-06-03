@@ -1,0 +1,405 @@
+	<script type="text/javascript">
+		if(window.process){
+			var typoraOptionPrefix = /^--tyopt=/;
+			for(argv of process.argv) {
+				if(typoraOptionPrefix.exec(argv)) {
+					window._options = JSON.parse(argv.substr("--tyopt=".length));
+					break;
+				}
+			}
+		}
+
+		window.MathJax = {
+			loader: {load: [/*'ui/safe', 'a11y/semantic-enrich',*/ 'input/tex/extensions/xypic']},
+			startup: {
+				typeset: false,
+				ready: () => {
+					console.debug('MathJax is loaded, but not yet initialized');
+		
+					const {RANGES} = MathJax._.core.MmlTree.OperatorDictionary;
+					RANGES[28][3] = RANGES[30][3] = RANGES[33][3] = RANGES[47][3] = 'mtext';
+					MathJax.startup.defaultReady();
+					MathJax.startup.document.addStyleSheet();
+				},
+				pageReady: () => {
+					/*var safeOptions = MathJax.startup.document.safe.options;
+					safeOptions.safeProtocols.file = false;
+					safeOptions.idPattern = /^mjx-[-a-zA-Z0-9_.:]+$/;
+					safeOptions.dataPattern = /^data-(mjx|semantic)-/;*/
+					//MathJax.startup.document.options.internalSpeechTitles = true;
+					console.debug('MathJax is initialized');
+				}
+			},
+			tex: {
+				macros: {
+					/*
+						MathJax.startup.input[0].configuration.handlers.get("macro")._configuration.items
+					*/
+					// https://github.com/mathjax/MathJax/pull/1810/files
+					AA:"\u00c5",alef:"\\aleph",alefsym:"\\aleph",Alpha:"\\mathrm{A}",and:"\\land",ang:"\\angle",Bbb:"\\mathbb",Beta:"\\mathrm{B}",bold:"\\mathbf",bull:"\\bullet",C:"\\mathbb{C}",Chi:"\\mathrm{X}",clubs:"\\clubsuit",cnums:"\\mathbb{C}",Complex:"\\mathbb{C}",coppa:"\u03D9",Coppa:"\u03D8",Dagger:"\\ddagger",Digamma:"\u03DC",darr:"\\downarrow",dArr:"\\Downarrow",Darr:"\\Downarrow",diamonds:"\\diamondsuit",empty:"\\emptyset",Epsilon:"\\mathrm{E}",Eta:"\\mathrm{H}",euro:"\u20AC",exist:"\\exists",geneuro:"\u20AC",geneuronarrow:"\u20AC",geneurowide:"\u20AC",H:"\\mathbb{H}",hAar:"\\Leftrightarrow",harr:"\\leftrightarrow",Harr:"\\Leftrightarrow",hearts:"\\heartsuit",image:"\\Im",infin:"\\infty",Iota:"\\mathrm{I}",isin:"\\in",Kappa:"\\mathrm{K}",koppa:"\u03DF",Koppa:"\u03DE",lang:"\\langle",larr:"\\leftarrow",Larr:"\\Leftarrow",lArr:"\\Leftarrow",lrarr:"\\leftrightarrow",Lrarr:"\\Leftrightarrow",lrArr:"\\Leftrightarrow",Mu:"\\mathrm{M}",N:"\\mathbb{N}",natnums:"\\mathbb{N}",Nu:"\\mathrm{N}",O:"\\emptyset",officialeuro:"\u20AC",Omicron:"\\mathrm{O}",or:"\\lor",P:"\u00B6",pagecolor:["",1],part:"\\partial",plusmn:"\\pm",Q:"\\mathbb{Q}",R:"\\mathbb{R}",rang:"\\rangle",rarr:"\\rightarrow",Rarr:"\\Rightarrow",rArr:"\\Rightarrow",real:"\\Re",reals:"\\mathbb{R}",Reals:"\\mathbb{R}",Rho:"\\mathrm{P}",sdot:"\\cdot",sampi:"\u03E1",Sampi:"\u03E0",sect:"\\S",spades:"\\spadesuit",stigma:"\u03DB",Stigma:"\u03DA",sub:"\\subset",sube:"\\subseteq",supe:"\\supseteq",Tau:"\\mathrm{T}",textvisiblespace:"\u2423",thetasym:"\\vartheta",uarr:"\\uparrow",uArr:"\\Uparrow",Uarr:"\\Uparrow",varcoppa:"\u03D9",varstigma:"\u03DB",vline:"\\smash{\\large\\lvert}",weierp:"\\wp",Z:"\\mathbb{Z}",Zeta:"\\mathrm{Z}",
+					dashint: "\\unicodeInt{x2A0D}",
+					ddashint: "\\unicodeInt{x2A0E}",
+					oiint: "\\unicodeInt{x222F}",
+					oiiint: "\\unicodeInt{x2230}",
+					ointctrclockwise: "\\unicodeInt{x2233}",
+					unicodeInt: ["\\mathop{\\vcenter{\\mathchoice{\\huge\\unicode{#1}\\,}{\\unicode{#1}}{\\unicode{#1}}{\\unicode{#1}}}\\,}\\nolimits", 1],
+					varointclockwise: "\\unicodeInt{x2232}",
+
+					...((window._options || {}).allowPhysicsConflict ? {} : {
+						div: ["\\divsymbol"],
+						Re: ["\\mathfrak{R}"]
+					})
+				},
+				maxBuffer: 10*1024,
+				displayMath: [['$$\n', '\n$$'], ['$$\r\n', '\r\n$$']],
+				inlineMath: [ ['$','$'], ['$$', '$$']],
+				processEscapes: true,
+				packages: {'[+]': ['noundefined', 'autoload', 'ams', 'physics', 'textmacros', 'xypic']},
+				tags: (window._options || {}).autoNumberingForMath ? "all" : "none",
+				formatError:               // function called when TeX syntax errors occur
+				(jax, err) => {
+					var message = err.message.replace(/\n.*/, "");
+					return jax.parseOptions.nodeFactory.create("error", message, err.id, "Error: " + message);
+				},
+				useLabelIds: true
+			},
+			svg: {
+				scale: 1,
+				minScale: 80,
+			},
+			options: {
+				skipHtmlTags: ["script","noscript","style","textarea","pre","code", "span"],
+				processHtmlClass: "md-mathjax-preview|md-inline-math|inline-math-export-jax|math-in-toc",
+				menuOptions: {
+					settings: {
+						inTabOrder: false
+					}
+				},
+				sre: {
+					speech: 'shallow',      // or 'shallow', or 'deep'
+				},
+				enableMenu: false,
+				ignoreHtmlClass: 'tex2jax_ignore',
+				renderActions: {
+					//
+					// Force speech enrichment regardless of the menu settings
+					// https://mathjax.github.io/MathJax-demos-web/speech-tex-chtml.html.html
+					/*enrich: {'[+]': [
+						function (doc) {doc.enrich(true)},
+						function (math, doc) {math.enrich(doc, true)}  
+					]}*/
+				}
+			}
+		};
+	</script>
+
+	
+	<script type="text/javascript" src="./lib.asar/MathJax3/es5/tex-svg-full.js" id="MathJax-script" defer></script>
+	
+	
+	<style type="text/css" id="write-style"></style>
+	<div id="typora-source" style="z-index:-1;">
+	</div>
+	<div class='md-notification-container'>
+		<div id='md-notification'></div>
+	</div>
+	<div id='typora-table-row-tracker' style="display: none;" class="md-tooltip-hide typora-table-tracker">
+		<div class="typora-table-drag-area"></div>
+		<div class="typora-table-data-area"></div>
+	</div>
+	<div id='typora-table-col-tracker' style="display: none;" class="md-tooltip-hide typora-table-tracker">
+		<div class="typora-table-drag-area"></div>
+		<div class="typora-table-data-area"></div>
+	</div>
+	<div id='typora-table-row-insert-marker' class="typora-table-insert-marker" style="display: none;">
+		<i class="fa fa-caret-left"></i>
+		<i class="fa fa-caret-right"></i>
+	</div>
+	<div id='typora-table-col-insert-marker' class="typora-table-insert-marker" style="display: none;">
+		<i class="fa fa-caret-down"></i>
+		<i class="fa fa-caret-up"></i>
+	</div>
+	<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+	    <symbol id="find-and-replace-icon-case" viewBox="0 0 20 16" fill-rule="evenodd">
+	        <path d="M10.919,13 L9.463,13 C9.29966585,13 9.16550052,12.9591671 9.0605,12.8775 C8.95549947,12.7958329 8.8796669,12.6943339 8.833,12.573 L8.077,10.508 L3.884,10.508 L3.128,12.573 C3.09066648,12.6803339 3.01716722,12.7783329 2.9075,12.867 C2.79783279,12.9556671 2.66366746,13 2.505,13 L1.042,13 L5.018,2.878 L6.943,2.878 L10.919,13 Z M4.367,9.178 L7.594,9.178 L6.362,5.811 C6.30599972,5.66166592 6.24416701,5.48550102 6.1765,5.2825 C6.108833,5.07949898 6.04233366,4.85900119 5.977,4.621 C5.91166634,4.85900119 5.84750032,5.08066564 5.7845,5.286 C5.72149969,5.49133436 5.65966697,5.67099923 5.599,5.825 L4.367,9.178 Z M18.892,13 L18.115,13 C17.9516658,13 17.8233338,12.9755002 17.73,12.9265 C17.6366662,12.8774998 17.5666669,12.7783341 17.52,12.629 L17.366,12.118 C17.1839991,12.2813341 17.0055009,12.4248327 16.8305,12.5485 C16.6554991,12.6721673 16.4746676,12.7759996 16.288,12.86 C16.1013324,12.9440004 15.903001,13.0069998 15.693,13.049 C15.4829989,13.0910002 15.2496679,13.112 14.993,13.112 C14.6896651,13.112 14.4096679,13.0711671 14.153,12.9895 C13.896332,12.9078329 13.6758342,12.7853342 13.4915,12.622 C13.3071657,12.4586658 13.1636672,12.2556679 13.061,12.013 C12.9583328,11.7703321 12.907,11.4880016 12.907,11.166 C12.907,10.895332 12.9781659,10.628168 13.1205,10.3645 C13.262834,10.100832 13.499665,9.8628344 13.831,9.6505 C14.162335,9.43816561 14.6033306,9.2620007 15.154,9.122 C15.7046694,8.9819993 16.3883292,8.90266676 17.205,8.884 L17.205,8.464 C17.205,7.98333093 17.103501,7.62750116 16.9005,7.3965 C16.697499,7.16549885 16.4023352,7.05 16.015,7.05 C15.7349986,7.05 15.5016676,7.08266634 15.315,7.148 C15.1283324,7.21333366 14.9661673,7.28683292 14.8285,7.3685 C14.6908326,7.45016707 14.5636672,7.52366634 14.447,7.589 C14.3303327,7.65433366 14.2020007,7.687 14.062,7.687 C13.9453327,7.687 13.8450004,7.65666697 13.761,7.596 C13.6769996,7.53533303 13.6093336,7.46066711 13.558,7.372 L13.243,6.819 C14.0690041,6.06299622 15.0653275,5.685 16.232,5.685 C16.6520021,5.685 17.0264983,5.75383264 17.3555,5.8915 C17.6845016,6.02916736 17.9633322,6.22049877 18.192,6.4655 C18.4206678,6.71050122 18.5944994,7.00333163 18.7135,7.344 C18.8325006,7.68466837 18.892,8.05799797 18.892,8.464 L18.892,13 Z M15.532,11.922 C15.7093342,11.922 15.8726659,11.9056668 16.022,11.873 C16.1713341,11.8403332 16.3124993,11.7913337 16.4455,11.726 C16.5785006,11.6606663 16.7068327,11.5801671 16.8305,11.4845 C16.9541673,11.3888329 17.0789993,11.2756673 17.205,11.145 L17.205,9.934 C16.7009975,9.95733345 16.279835,10.0004997 15.9415,10.0635 C15.603165,10.1265003 15.3313343,10.2069995 15.126,10.305 C14.9206656,10.4030005 14.7748337,10.5173327 14.6885,10.648 C14.6021662,10.7786673 14.559,10.9209992 14.559,11.075 C14.559,11.3783349 14.6488324,11.5953327 14.8285,11.726 C15.0081675,11.8566673 15.2426652,11.922 15.532,11.922 L15.532,11.922 Z"></path>
+	    </symbol>
+	    <symbol id="find-and-replace-icon-word" viewBox="0 0 20 16" fill-rule="evenodd">
+	        <rect opacity="0.6" x="1" y="3" width="2" height="6"></rect>
+	        <rect opacity="0.6" x="17" y="3" width="2" height="6"></rect>
+	        <rect x="6" y="3" width="2" height="6"></rect>
+	        <rect x="12" y="3" width="2" height="6"></rect>
+	        <rect x="9" y="3" width="2" height="6"></rect>
+	        <path d="M4.5,13 L15.5,13 L16,13 L16,12 L15.5,12 L4.5,12 L4,12 L4,13 L4.5,13 L4.5,13 Z"></path>
+	        <path d="M4,10.5 L4,12.5 L4,13 L5,13 L5,12.5 L5,10.5 L5,10 L4,10 L4,10.5 L4,10.5 Z"></path>
+	        <path d="M15,10.5 L15,12.5 L15,13 L16,13 L16,12.5 L16,10.5 L16,10 L15,10 L15,10.5 L15,10.5 Z"></path>
+	    </symbol>
+	</svg>
+	<!-- Modal -->
+	<div class="modal fade" id="table-insert-dialog" role="dialog" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<div class="modal-title" id="myModalLabel" data-localize="Insert Table" data-lg="Front">Insert Table</div>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<div class="col-lg-6">
+							<div class="input-group">
+								<span class="input-group-addon" data-localize="Columns" data-lg="Front">Columns</span>
+								<input id="table-insert-col" class="form-control" value="3" />
+							</div>
+						</div>
+						<div class="col-lg-6">
+							<div class="input-group">
+								<span class="input-group-addon" data-localize="Rows" data-lg="Front">Rows</span>
+								<input id="table-insert-row" class="form-control" value="4" />
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal" data-localize="Cancel" data-lg="Front">Cancel</button>
+					<button type="button" class="btn btn-primary" data-localize="OK" data-lg="Front">OK</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade stopselect" id="image-create-folder-confirm" role="dialog" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close">&times;</button>
+					<div class="modal-title" data-localize="Copy Image to…" data-lg="Front">Copy Image to…</div>
+				</div>
+				<div class="modal-body">
+					<div class="row" data-localize='Typora are trying copy the newly inserted image to folder <code id="image-create-folder-target"></code> according to your YAML Front Matter setting. But the target folder does not exist, create it now?' data-lg="Front" data-lt="html">
+						Typora are trying copy the newly inserted image to folder <code id="image-create-folder-target"></code> according to your YAML Front Matter setting. But the target folder does not exist, create it now?
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary image-create-folder-dialog-yes" data-localize="Create Folder" data-lg="Front">Create Folder</button>
+					<button type="button" class="btn btn-default image-create-folder-dialog-no" data-localize="Cancel" data-lg="Front">Cancel</button>
+
+					<button type="button" class="btn btn-default image-create-folder-dialog-help" style="float:left;" data-localize="More Info" data-lg="Front">Learn More…</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="componenet">
+		<div class="md-mathjax-tooltip">
+			<div class="btn-group btn-group-sm">
+				<button type="button" class="btn btn-default jax-trigger-delete-button" aria-label="Delete Math"><i class="ty-icon ty-delete"></i>
+				</button>
+			</div>
+		</div>
+		<div class="md-diagram-panel md-fences-adv-panel" >
+			<div class="md-diagram-panel-header"></div>
+			<div class="md-diagram-panel-preview"></div>
+			<div class="md-diagram-panel-error"></div>
+		</div>
+		<script id="md-mathblock-panel-templ" type="text/x-custom-template">
+			<div class="md-mathblock-panel md-rawblock-panel" contenteditable="false">
+				<div contenteditable="false" class="md-rawblock-control md-rawblock-before">$$
+					<span class="md-math-tag-input ty-input ty-input-before" tabindex="-1" contenteditable="plaintext-only"></span>
+				</div>
+				<div class="md-rawblock-control md-rawblock-input md-mathblock-input">
+				</div>
+				<div contenteditable="false" class="md-rawblock-control md-rawblock-after">$$
+					<span class="md-math-tag-input ty-input ty-input-after" tabindex="-1" contenteditable="plaintext-only"></span>
+				</div>
+				<div class="code-tooltip" contenteditable="false">
+					<div class="md-mathjax-preview" contenteditable="false"></div>
+				</div>
+			</div>
+		</script>
+		<script id="md-rawblock-tooltip-templ" type="text/x-custom-template">
+			<div class="md-rawblock-tooltip md-rawblock-control"  contenteditable="false">
+				<span class="md-rawblock-tooltip-name">{type}</span>
+				<span class="md-rawblock-tooltip-btn md-rawblock-tooltip-edit-btn" ty-hint="Edit">
+					<i class="fa fa-code" aria-hidden="true"></i>
+				</span>
+				<span class="md-rawblock-tooltip-btn md-rawblock-tooltip-ok-btn" ty-hint="Finish Editing">
+						<i class="ion-checkmark"></i>
+				</span>
+			</div>
+		</script>
+		<script id="md-html-iframe-preload-temp" type="text/x-custom-template">
+			function iframePreloadScript(cid){
+				var resizeTimer;
+				var stopObserverTimer;
+
+				function resize(){
+					resizeTimer = null;
+					top.postMessage({
+						msg: "changeHeight",
+						height: document.body.parentElement.offsetHeight,
+						cid: cid
+					}, "*");
+				}
+				var observer = new MutationObserver(function(){
+					if(!resizeTimer) {
+						requestAnimationFrame(resize);
+						resizeTimer = true;
+					}
+				});
+
+				function startListenContentChanges(onInit) {
+					if(!document.body) return;
+
+					if(stopObserverTimer) {
+						clearTimeout(stopObserverTimer);
+						observer.disconnect();
+					}
+
+					observer.observe(document.body, {
+						attributes: true,
+						childList: true,
+						subtree: true
+					});
+
+					resize();
+					setTimeout(resize, 300);
+					if(onInit) {
+						setTimeout(resize, 1000);
+						setTimeout(resize, 3000);
+						setTimeout(resize, 5000);
+					}
+				}
+
+				function initApplication(){
+					startListenContentChanges(true);
+
+					window.addEventListener('message', function(e){
+						if(e.data == "syncHeight") {
+							startListenContentChanges();
+						}
+					});
+					
+					var mousedownPos;
+					document.addEventListener("mousedown", function(e){
+						top.postMessage({
+							msg: "mousedown",
+							cid: cid
+						}, "*");
+						mousedownPos = null;
+
+						if(e.target.tagName == "A") {
+							e.target.target = "_blank";
+						} else if(e.ctrlKey || e.metaKey){
+							top.postMessage({
+								msg: "startEditing",
+								cid: cid
+							}, "*");
+							e.preventDefault();
+						} else {
+							mousedownPos = [e.offsetX, e.offsetY]
+						}
+					});
+					document.addEventListener("contextmenu", function(e){
+						top.postMessage({
+							msg: "contextmenu",
+							event: {
+								clientY: e.clientY,
+								clientX: e.clientX
+							},
+							cid: cid
+						}, "*");
+					});
+				}
+
+				document.onreadystatechange = function () {
+					if (document.readyState === "interactive") {
+						initApplication();
+					}
+				}
+			};
+		</script>
+	</div>
+
+	<script id="md-htmlblock-panel-placeholder-templ" type="text/x-custom-template">
+		<div class="ty-lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+	</script>
+
+	<script id="md-htmlblock-panel-novideo-templ" type="text/x-custom-template">
+		<div class="md-resouce-error-wrapper">
+		<span class="md-resouce-error-mark"><span class="ty-icon ty-no-video"></span></span>
+		<span class="md-resouce-error-message">{src}</span>
+		</div>
+	</script>
+
+	<script id="md-htmlblock-panel-nohtml-templ" type="text/x-custom-template">
+		<div class="md-resouce-error-wrapper">
+		<span class="md-resouce-error-mark"><span class="ty-icon ty-error-file"></span></span>
+		<span class="md-resouce-error-message">{src}</span>
+		</div>
+	</script>
+
+	<script id="ty-enter-mode-warning-temp" type="text/x-custom-template">
+		<p class="ty-enter-mode-warning-header" style="margin-bottom: 0"></p>
+		<div style="padding-left: 64px;display: flex;flex-direction: row;align-items: flex-end;justify-content: space-between;margin-bottom: 8px;">
+			<div class="ty-enter-mode-warning-body" style="opacity: 0.7;font-size: 0.8rem;text-align: left;flex:1;margin-right: 16px;">
+			</div>
+			<div style="padding:0;background: inherit;">
+				<label style="opacity: 0.7;font-size: 0.8rem;margin-right:16px;"><input id="ty-suppress-mode-warning-input" type="checkbox" style="margin-right:8px;vertical-align: middle;"><span data-localize="Do not show this again" data-lg="Panel" style="vertical-align: middle;">Do not show this again</span></label>
+				<button id="ty-suppress-mode-warning-close-btn" class='btn btn-default btn-sm' style='float:right;margin-top:1px;' data-localize='Dismiss' data-lg="Front">Dismiss</button>
+			</div>
+		</div>
+	</script>
+
+	<template id="ty-resize-temp">
+		<div class="ty-resize-top ty-resize-top-top ty-resize-control"></div> 
+		<div class="ty-resize-bottom ty-resize-bottom ty-resize-control"></div> 
+		<div class="ty-resize-top ty-resize-top-left ty-resize-control"></div> 
+		<div class="ty-resize-top ty-resize-top-right ty-resize-control"></div> 
+		<div class="ty-resize-left ty-resize-top-left ty-resize-control"></div> 
+		<div class="ty-resize-right ty-resize-top-right ty-resize-control"></div>
+		<div class="ty-resize-bottom ty-resize-bottom-left ty-resize-control"></div> 
+		<div class="ty-resize-bottom ty-resize-bottom-right ty-resize-control"></div> 
+		<div class="ty-resize-left ty-resize-bottom-left ty-resize-control"></div> 
+		<div class="ty-resize-right ty-resize-bottom-right ty-resize-control"></div> 
+	</template>
+
+	<span class="tip" title="tooltip content"></span>
+	<span id="inline-math-export-jax" class="inline-math-export-jax" style="display: none">$x}$</span>
+
+	<div id="bottom-hint" class="ty-block-hint" style="display:none;">Paragraph</div>
+
+	<div id="ty-auto-suggest" class="auto-suggest-container">
+	</div>
+	<div id="typora-caret" style="display:none; position:absolute; width:1px; box-sizing: border-box;border-right:1px solid;">
+	</div>
+	<!--iv id="math-preheat" style="display:none; position:absolute; width:1px; box-sizing: border-box;border-right:1px solid;">
+		$x$
+	</div-->
+	<div id="math-inline-preview" class="code-tooltip md-tooltip-hide md-hover-tip" style="display:none"><div class="md-arrow"></div><div id="math-inline-preview-content" class="code-tooltip-content"></div></div>
+	<div id="zoom-hint" style="display:none" role="panel">
+		<span id="zoom-hint-current">100%</span>
+		<span id="zoom-hint-in" role="button" class="zoom-hint-button" aria-label="zoom out"><i class="ion-minus-round"></i></span>
+		<span id="zoom-hint-out" role="button" class="zoom-hint-button" aria-label="zoom in"><i class="ion-plus-round"></i></span>
+		<span id="zoom-hint-reset" role="button" class="zoom-hint-button" aria-label="reset zoom factor">Reset</span>
+	</div>
+
+	<div id="write" class="ty-before-first-render" contenteditable="false" spellcheck="true" tabindex="-1">
+		<div style="opacity: 0;">
+			<h1>ABCDEFG</h1>
+			<p>abcdefg</p>
+		</div>
+	</div>
+	<canvas style="display:none;" id="video-canvas"></canvas>
+	<div id="ty-oversize-body"  contenteditable="false" style="display: none;">
+		<div class="ty-oversize-modal">
+				<div style="font-size:24px;opacity: 0.8;text-align: left;margin-bottom:8px;">
+					<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+				</div>
+				<div style="opacity: 0.8;" data-localize="The file is too large to render in Typora." data-lg="Front">
+					The file is too large to render in Typora.
+				</div>
+				<div style="margin-top: 24px;text-align: right;">
+					<button style="display: none;" id="ty-oversize-file-open-in" class="btn btn-default" data-localize="Open in…" data-lg="Front">Open in…</button>
+					<button style="display: none;" id="ty-oversize-file-quick-look" class="btn btn-default" data-localize="QuickLook" data-lg="Front">QuickLook</button>
+				</div>
+		</div>
+	</div>
+
+	<div id="mermaid-canvas" style="display: none;">
+	</div>
